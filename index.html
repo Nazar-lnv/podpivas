@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PODPIVAS — Esports Team</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --orange: #ff6a00;
+    --orange-light: #ff9a3c;
+    --orange-glow: rgba(255,106,0,0.4);
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #181818;
+    --text: #ffffff;
+    --muted: #888888;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,106,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,106,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+  #snow { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+  .page { display: none; position: relative; z-index: 2; }
+  .page.active { display: block; }
+
+  /* MAIN PAGE */
+  .wrapper { max-width: 860px; margin: 0 auto; padding: 40px 20px 60px; }
+  .header { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-bottom: 40px; }
+  .clock { font-family: 'Orbitron', monospace; font-size: 13px; color: var(--orange); letter-spacing: 4px; opacity: 0.7; }
+  .logo-ring { position: relative; width: 130px; height: 130px; }
+  .logo-ring::before {
+    content: ''; position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid var(--orange);
+    box-shadow: 0 0 20px var(--orange-glow), inset 0 0 20px var(--orange-glow);
+    animation: ringPulse 3s ease-in-out infinite;
+  }
+  @keyframes ringPulse {
+    0%, 100% { box-shadow: 0 0 20px var(--orange-glow), inset 0 0 10px var(--orange-glow); }
+    50% { box-shadow: 0 0 40px var(--orange), inset 0 0 30px var(--orange-glow); }
+  }
+  .logo-ring img { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; display: block; background: #1a1a1a; }
+  .logo-fallback {
+    width: 130px; height: 130px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #2a1800, #0f0f0f);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900;
+    color: var(--orange); text-shadow: 0 0 20px var(--orange);
+  }
+  .orbit { position: absolute; width: 10px; height: 10px; background: var(--orange); border-radius: 50%; top: -5px; left: 50%; transform-origin: 0 75px; animation: orbit 4s linear infinite; box-shadow: 0 0 8px var(--orange); }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+  .team-title {
+    font-family: 'Orbitron', sans-serif; font-size: clamp(48px, 12vw, 86px); font-weight: 900; letter-spacing: 8px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--orange) 60%, #ff3d00 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 30px var(--orange)); line-height: 1;
+  }
+  .subtitle { font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 5px; color: var(--orange-light); opacity: 0.8; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 30px; background: var(--orange); border: 1px solid var(--orange); border-radius: 4px; overflow: hidden; }
+  .stat { background: var(--bg2); padding: 18px 10px; text-align: center; transition: background 0.2s; }
+  .stat:hover { background: #1a1a1a; }
+  .stat-num { font-family: 'Orbitron', monospace; font-size: 36px; font-weight: 900; color: var(--orange); text-shadow: 0 0 20px var(--orange); line-height: 1; }
+  .stat-label { font-size: 11px; letter-spacing: 3px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+  .btn-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+  .btn-row { display: grid; gap: 8px; }
+  .btn-row-1 { grid-template-columns: 1fr; }
+  .btn-row-3 { grid-template-columns: repeat(3, 1fr); }
+  .btn-row-2 { grid-template-columns: repeat(2, 1fr); }
+  .btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; padding: 22px 16px; background: var(--bg3); border: 1px solid #2a2a2a; border-radius: 4px;
+    cursor: pointer; text-decoration: none; color: var(--text); font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
+    transition: all 0.2s ease; position: relative; overflow: hidden; text-align: center; line-height: 1.3;
+  }
+  .btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 40%, rgba(255,106,0,0.06)); opacity: 0; transition: opacity 0.3s; }
+  .btn:hover::before { opacity: 1; }
+  .btn:hover { border-color: var(--orange); box-shadow: 0 0 16px var(--orange-glow), inset 0 0 16px rgba(255,106,0,0.04); transform: translateY(-1px); color: var(--orange-light); }
+  .btn .icon { font-size: 24px; line-height: 1; }
+  .btn .corner { position: absolute; width: 8px; height: 8px; border-color: var(--orange); border-style: solid; opacity: 0; transition: opacity 0.2s; }
+  .btn:hover .corner { opacity: 1; }
+  .corner-tl { top: 4px; left: 4px; border-width: 1px 0 0 1px; }
+  .corner-tr { top: 4px; right: 4px; border-width: 1px 1px 0 0; }
+  .corner-bl { bottom: 4px; left: 4px; border-width: 0 0 1px 1px; }
+  .corner-br { bottom: 4px; right: 4px; border-width: 0 1px 1px 0; }
+  .btn-telegram { border-color: #1e3a5f; }
+  .btn-telegram .icon { color: #29a0e0; }
+  .btn-telegram:hover { border-color: #29a0e0; box-shadow: 0 0 20px rgba(41,160,224,0.3); color: #29a0e0; }
+  .btn-youtube { border-color: #3a1e1e; }
+  .btn-youtube .icon { color: #ff3d3d; }
+  .btn-youtube:hover { border-color: #ff3d3d; box-shadow: 0 0 20px rgba(255,61,61,0.3); color: #ff3d3d; }
+  .btn-tiktok { border-color: #1e1e3a; }
+  .btn-tiktok .icon { color: #ee1d52; }
+  .btn-tiktok:hover { border-color: #ee1d52; box-shadow: 0 0 20px rgba(238,29,82,0.3); color: #ee1d52; }
+  .sponsor { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 24px; padding: 14px; border: 1px solid #222; border-radius: 4px; font-size: 11px; letter-spacing: 3px; color: #555; text-transform: uppercase; }
+  .sponsor-name { font-weight: 700; color: var(--orange); font-size: 14px; letter-spacing: 1px; }
+  .particle { position: fixed; background: var(--orange); border-radius: 50%; pointer-events: none; opacity: 0; animation: floatUp linear infinite; z-index: 1; }
+  @keyframes floatUp { 0% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.3; } 100% { transform: translateY(-100px); opacity: 0; } }
+
+  /* ROSTER PAGE */
+  .roster-wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; }
+  .roster-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; }
+  .roster-title { font-family: 'Orbitron', sans-serif; font-size: clamp(28px, 6vw, 52px); font-weight: 900; letter-spacing: 4px; line-height: 1; }
+  .roster-title span:first-child { color: #fff; }
+  .roster-title span:last-child { color: var(--orange); }
+  .roster-title-line { width: 80px; height: 3px; background: var(--orange); margin-top: 10px; box-shadow: 0 0 10px var(--orange); }
+  .back-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--orange); border-radius: 3px; color: var(--orange); font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 3px; cursor: pointer; background: transparent; transition: all 0.2s; text-transform: uppercase; white-space: nowrap; }
+  .back-btn:hover { background: var(--orange); color: #000; box-shadow: 0 0 20px var(--orange-glow); }
+  .player-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .player-card { background: #0e0e0e; border: 1px solid #222; border-radius: 4px; overflow: hidden; position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+  .player-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(255,106,0,0.25); border-color: var(--orange); }
+  .player-num { position: absolute; top: 10px; right: 12px; font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; color: var(--orange); opacity: 0.8; z-index: 2; }
+  .player-scan { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--orange), transparent); animation: scan 2.5s ease-in-out infinite; z-index: 3; opacity: 0; transition: opacity 0.3s; }
+  .player-card:hover .player-scan { opacity: 1; }
+  @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+  .player-photo-wrap { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%); position: relative; }
+  .player-photo-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; filter: grayscale(20%) contrast(1.1); transition: filter 0.3s, transform 0.3s; }
+  .player-card:hover .player-photo-wrap img { filter: grayscale(0%) contrast(1.2); transform: scale(1.03); }
+  .player-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #333; font-size: 40px; }
+  .player-photo-placeholder span { font-size: 11px; letter-spacing: 2px; color: #2a2a2a; font-family: 'Orbitron', monospace; }
+  .player-photo-wrap::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(transparent, #0e0e0e); z-index: 1; }
+  .player-info { padding: 12px 14px 16px; }
+  .player-name { font-family: 'Orbitron', sans-serif; font-size: clamp(10px, 1.3vw, 13px); font-weight: 700; letter-spacing: 1px; color: #fff; text-transform: uppercase; line-height: 1.2; margin-bottom: 4px; word-break: break-word; }
+  .player-role { font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+  .player-status { display: inline-block; padding: 3px 8px; border: 1px solid var(--orange); color: var(--orange); font-size: 9px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; font-family: 'Orbitron', monospace; }
+
+  @media (max-width: 700px) { .player-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .btn-row-3 { grid-template-columns: 1fr; } .btn-row-2 { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<canvas id="snow"></canvas>
+
+<!-- MAIN PAGE -->
+<div class="page active" id="page-main">
+  <div class="wrapper">
+    <div class="header">
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="logo-ring">
+        <img id="avatar" src="podpivas.png" alt="PODPIVAS" onerror="this.style.display='none';document.getElementById('avatar-fallback').style.display='flex';">
+        <div id="avatar-fallback" class="logo-fallback" style="display:none;">P</div>
+        <div class="orbit"></div>
+      </div>
+      <h1 class="team-title">PODPIVAS</h1>
+      <div class="subtitle">// ESPORTS TEAM &nbsp;·&nbsp; EST. 2026</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="wins">0</div><div class="stat-label">ПОБЕД</div></div>
+      <div class="stat"><div class="stat-num" id="losses">0</div><div class="stat-label">ПОРАЖЕНИЙ</div></div>
+      <div class="stat"><div class="stat-num" id="players">0</div><div class="stat-label">ИГРОКОВ</div></div>
+      <div class="stat"><div class="stat-num" id="matches">0</div><div class="stat-label">МАТЧЕЙ</div></div>
+    </div>
+
+    <div class="btn-grid">
+      <div class="btn-row btn-row-1">
+        <a href="https://t.me/p0dpivasteam" target="_blank" class="btn btn-telegram">
+          <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+          <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+          <span class="icon">✈️</span>ТЕЛЕГРАМ
+        </a>
+      </div>
+      <div class="btn-row btn-row-3">
+        <a href="#" class="btn" onclick="showPage('roster');return false;">
+          <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+          <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+          <span class="icon">⚡</span>ОСНОВНОЙ СОСТАВ
+        </a>
+        <a href="#" class="btn" onclick="showPage('reserve');return false;">
+          <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+          <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+          <span class="icon">🎬</span>ЗАПАС
+        </a>
+        <a href="#" class="btn">
+          <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+          <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+          <span class="icon">🏆</span>МАТЧИ
+        </a>
+      </div>
+      <div class="btn-row btn-row-2">
+        <a href="#" class="btn btn-youtube">
+          <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+          <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+          <span class="icon">▶️</span>YOUTUBE
+        </a>
+        <a href="https://www.tiktok.com/@podpivasteam?_r=1&_t=ZN-94IOk4zjW4s" target="_blank" class="btn btn-tiktok">
+          <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+          <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+          <span class="icon">🎵</span>TIKTOK
+        </a>
+      </div>
+    </div>
+
+    <div class="sponsor">
+      <span>SPONSORED BY</span>
+      <span class="sponsor-name">JOBCENTER</span>
+      <span>⚡</span>
+    </div>
+  </div>
+</div>
+
+<!-- ROSTER PAGE -->
+<div class="page" id="page-roster">
+  <div class="roster-wrapper">
+    <div class="roster-header">
+      <div>
+        <div class="roster-title"><span>MAIN </span><span>ROSTER</span></div>
+        <div class="roster-title-line"></div>
+      </div>
+      <button class="back-btn" onclick="showPage('main')">← НАЗАД</button>
+    </div>
+
+    <div class="player-grid">
+
+      <div class="player-card">
+        <div class="player-scan"></div>
+        <div class="player-num">01</div>
+        <div class="player-photo-wrap">
+          <img src="player1.jpg" alt="Персик" onerror="this.parentNode.innerHTML='<div class=player-photo-placeholder>👤<span>NO PHOTO</span></div>'">
+        </div>
+        <div class="player-info">
+          <div class="player-name">Персик</div>
+          <div class="player-role">MAIN ROSTER</div>
+          <span class="player-status">ACTIVE</span>
+        </div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-scan"></div>
+        <div class="player-num">02</div>
+        <div class="player-photo-wrap">
+          <img src="player2.jpg" alt="Макароньи" onerror="this.parentNode.innerHTML='<div class=player-photo-placeholder>👤<span>NO PHOTO</span></div>'">
+        </div>
+        <div class="player-info">
+          <div class="player-name">Макароньи</div>
+          <div class="player-role">MAIN ROSTER</div>
+          <span class="player-status">ACTIVE</span>
+        </div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-scan"></div>
+        <div class="player-num">03</div>
+        <div class="player-photo-wrap">
+          <img src="player3.jpg" alt="ЖОПА ЕБАНУТАЯ" onerror="this.parentNode.innerHTML='<div class=player-photo-placeholder>👤<span>NO PHOTO</span></div>'">
+        </div>
+        <div class="player-info">
+          <div class="player-name">ЖОПА ЕБАНУТАЯ</div>
+          <div class="player-role">MAIN ROSTER</div>
+          <span class="player-status">ACTIVE</span>
+        </div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-scan"></div>
+        <div class="player-num">04</div>
+        <div class="player-photo-wrap">
+          <img src="player4.jpg" alt="Malr1ne" onerror="this.parentNode.innerHTML='<div class=player-photo-placeholder>👤<span>NO PHOTO</span></div>'">
+        </div>
+        <div class="player-info">
+          <div class="player-name">Malr1ne</div>
+          <div class="player-role">MAIN ROSTER</div>
+          <span class="player-status">ACTIVE</span>
+        </div>
+      </div>
+
+      <div class="player-card">
+        <div class="player-scan"></div>
+        <div class="player-num">05</div>
+        <div class="player-photo-wrap">
+          <img src="player5.jpg" alt="Kamarka-Pocoyo" onerror="this.parentNode.innerHTML='<div class=player-photo-placeholder>👤<span>NO PHOTO</span></div>'">
+        </div>
+        <div class="player-info">
+          <div class="player-name">Kamarka-Pocoyo</div>
+          <div class="player-role">MAIN ROSTER</div>
+          <span class="player-status">ACTIVE</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RESERVE PAGE -->
+<div class="page" id="page-reserve">
+  <div class="roster-wrapper">
+    <div class="roster-header">
+      <div>
+        <div class="roster-title"><span>RESERVE </span><span>ROSTER</span></div>
+        <div class="roster-title-line"></div>
+      </div>
+      <button class="back-btn" onclick="showPage('main')">← НАЗАД</button>
+    </div>
+
+    <div class="player-grid" style="grid-template-columns: repeat(4,1fr);">
+
+      <div class="player-card">
+        <div class="player-scan"></div>
+        <div class="player-num">01</div>
+        <div class="player-photo-wrap">
+          <img src="player6.jpg" alt="dapi" onerror="this.parentNode.innerHTML='<div class=player-photo-placeholder>👤<span>NO PHOTO</span></div>'">
+        </div>
+        <div class="player-info">
+          <div class="player-name">dapi</div>
+          <div class="player-role">RESERVE ROSTER</div>
+          <span class="player-status">ACTIVE</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  /* PAGE SWITCHING */
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  /* CLOCK */
+  function tick() {
+    const n = new Date();
+    document.getElementById('clock').textContent =
+      String(n.getHours()).padStart(2,'0') + ':' +
+      String(n.getMinutes()).padStart(2,'0') + ':' +
+      String(n.getSeconds()).padStart(2,'0');
+  }
+  setInterval(tick, 1000); tick();
+
+  /* COUNT UP */
+  function countUp(id, target, dur) {
+    let v = 0; const step = target / (dur / 16);
+    const t = setInterval(() => {
+      v += step;
+      if (v >= target) { document.getElementById(id).textContent = target; clearInterval(t); }
+      else document.getElementById(id).textContent = Math.floor(v);
+    }, 16);
+  }
+  countUp('wins',0,100); countUp('losses',0,100); countUp('players',6,800); countUp('matches',0,100);
+
+  /* PARTICLES */
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    const s = (1 + Math.random() * 3) + 'px';
+    p.style.width = p.style.height = s;
+    document.body.appendChild(p);
+  }
+
+  /* SNOW */
+  (function() {
+    const canvas = document.getElementById('snow');
+    const ctx = canvas.getContext('2d');
+    let W, H, flakes = [];
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    function Flake() {
+      this.reset = function() {
+        this.x = Math.random() * W;
+        this.y = -10;
+        this.r = 0.8 + Math.random() * 2.5;
+        this.speed = 0.6 + Math.random() * 1.6;
+        this.wind = (Math.random() - 0.5) * 0.5;
+        this.opacity = 0.35 + Math.random() * 0.55;
+        this.wobble = Math.random() * Math.PI * 2;
+        this.wobbleSpeed = 0.01 + Math.random() * 0.02;
+      };
+      this.reset(); this.y = Math.random() * H;
+    }
+    for (let i = 0; i < 160; i++) flakes.push(new Flake());
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      flakes.forEach(f => {
+        f.wobble += f.wobbleSpeed;
+        f.x += f.wind + Math.sin(f.wobble) * 0.35;
+        f.y += f.speed;
+        if (f.y > H + 10) f.reset();
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,210,170,' + f.opacity + ')';
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+</script>
+</body>
+</html>
